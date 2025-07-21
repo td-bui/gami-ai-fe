@@ -36,8 +36,8 @@ const LoginPage = () => {
       // Store token and username in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("refreshToken", data.refreshToken);
-      localStorage.setItem("username", username); // <-- store username
-      localStorage.setItem("userId", data.userId); // Store userId if needed
+      localStorage.setItem("username", username);
+      localStorage.setItem("userId", data.userId);
       localStorage.setItem("level", data.level);
       router.push("/lesson");
     } catch (err) {
@@ -91,7 +91,7 @@ const LoginPage = () => {
         </button>
 
         <div className="text-xs text-gray-500 mb-2 text-center mt-1">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a href="/signup" className="text-blue-500 hover:underline font-semibold">
             Sign Up
           </a>
