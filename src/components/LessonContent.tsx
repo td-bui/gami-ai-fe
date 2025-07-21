@@ -6,6 +6,7 @@ import ExampleBlock from "./ExampleBlock";
 import QuizSection from "./QuizSection";
 import { authFetch } from "@/utils/authFetch";// Adjust the import path as needed
 import { useRouter } from "next/navigation"; // Add this import
+import { createRoot } from "react-dom/client";
 
 // Helper to inject code examples into HTML content
 function injectExamples(html: string, examples: any[]) {
@@ -218,3 +219,9 @@ const LessonContent = React.memo(function LessonContent({
 });
 
 export default LessonContent;
+
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}
