@@ -7,187 +7,128 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id       String @id
-  username String @unique
+model User {
+  id            String         @id @default(cuid())
+  username      String         @unique
+  email         String        @unique
+  password      String
+  role          String        @default("user")
+  joinDate      DateTime      @default(now())
+  xp            Int           @default(0)
+  level         Int           @default(1)
+  problems      Problem[]     @relation("CreatedBy")
+  submissions   Submission[]
+  aiAssistance  AiAssistance[]
+  userProgress  UserProgress[]
+  userBadges    UserBadge[]
+  leaderboard   Leaderboard?
 }
 
-model Student {
-  id          String       @id
-  username    String       @unique
-  name        String
-  surname     String
-  email       String?      @unique
-  phone       String?      @unique
-  address     String
-  img         String?
-  bloodType   String
-  sex         UserSex
-  createdAt   DateTime     @default(now())
-  parentId    String
-  parent      Parent       @relation(fields: [parentId], references: [id])
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
-  gradeId     Int
-  grade       Grade        @relation(fields: [gradeId], references: [id])
-  attendances Attendance[]
-  results     Result[]
-  birthday    DateTime
+model Problem {
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  difficulty    String
+  tags          String[]
+  constraints   String
+  examples      String
+  starterCode   String        @map("starter_code")
+  solutionCode  String        @map("solution_code")
+  createdBy     User          @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById   String        @map("created_by")
+  createdAt     DateTime      @default(now())
+  testCases     TestCase[]
+  submissions   Submission[]
+  aiAssistance  AiAssistance[]
+  userProgress  UserProgress[]
+  trackProblems TrackProblem[]
 }
 
-model Teacher {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  email     String?   @unique
-  phone     String?   @unique
-  address   String
-  img       String?
-  bloodType String
-  sex       UserSex
-  createdAt DateTime  @default(now())
-  subjects  Subject[]
-  lessons   Lesson[]
-  classes   Class[]
-  birthday  DateTime
+model TestCase {
+  id            String    @id @default(cuid())
+  problemId     String
+  input         String
+  expectedOutput String   @map("expected_output")
+  isPublic      Boolean  @default(false)
+  problem       Problem   @relation(fields: [problemId], references: [id])
 }
 
-model Parent {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  email     String?   @unique
-  phone     String    @unique
-  address   String
-  createdAt DateTime  @default(now())
-  students  Student[]
+model Submission {
+  id            String    @id @default(cuid())
+  userId        String
+  problemId     String
+  code          String    @db.Text
+  language      String
+  status        String
+  runtime       Float
+  memory        Float
+  submittedAt   DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id])
+  problem       Problem   @relation(fields: [problemId], references: [id])
 }
 
-model Grade {
-  id    Int @id @default(autoincrement())
-  level Int @unique
-
-  students Student[]
-  classess Class[]
+model AiAssistance {
+  id             String    @id @default(cuid())
+  userId         String
+  problemId      String
+  suggestionType String
+  aiResponse     String    @db.Text
+  timestamp      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id])
+  problem        Problem   @relation(fields: [problemId], references: [id])
 }
 
-model Class {
-  id       Int    @id @default(autoincrement())
-  name     String @unique
-  capacity Int
+model UserProgress {
+  userId         String
+  problemId      String
+  solved         Boolean   @default(false)
+  attempts       Int       @default(0)
+  lastAttempted  DateTime  @updatedAt
+  firstSolved    DateTime?
+  user           User      @relation(fields: [userId], references: [id])
+  problem        Problem   @relation(fields: [problemId], references: [id])
 
-  supervisorId  String?
-  supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
-  lessons       Lesson[]
-  students      Student[]
-  gradeId       Int
-  grade         Grade          @relation(fields: [gradeId], references: [id])
-  events        Event[]
-  announcements Announcement[]
+  @@id([userId, problemId])
 }
 
-model Subject {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  teachers Teacher[]
-  lessons  Lesson[]
-}
-
-model Lesson {
-  id        Int      @id @default(autoincrement())
-  name      String
-  day       Day
-  startTime DateTime
-  endTime   DateTime
-
-  subjectId   Int
-  subject     Subject      @relation(fields: [subjectId], references: [id])
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
-  teacherId   String
-  teacher     Teacher      @relation(fields: [teacherId], references: [id])
-  exams       Exam[]
-  assignments Assignment[]
-  attendances Attendance[]
-}
-
-model Exam {
-  id        Int      @id @default(autoincrement())
-  title     String
-  startTime DateTime
-  endTime   DateTime
-
-  lessonId Int
-  lesson   Lesson   @relation(fields: [lessonId], references: [id])
-  results  Result[]
-}
-
-model Assignment {
-  id        Int      @id @default(autoincrement())
-  title     String
-  startDate DateTime
-  dueDate   DateTime
-
-  lessonId Int
-  lesson   Lesson   @relation(fields: [lessonId], references: [id])
-  results  Result[]
-}
-
-model Result {
-  id    Int @id @default(autoincrement())
-  score Int
-
-  examId       Int?
-  exam         Exam?       @relation(fields: [examId], references: [id])
-  assignmentId Int?
-  assignment   Assignment? @relation(fields: [assignmentId], references: [id])
-  studentId    String
-  student      Student     @relation(fields: [studentId], references: [id])
-}
-
-model Attendance {
-  id      Int      @id @default(autoincrement())
-  date    DateTime
-  present Boolean
-
-  studentId String
-  student   Student @relation(fields: [studentId], references: [id])
-  lessonId  Int
-  lesson    Lesson  @relation(fields: [lessonId], references: [id])
-}
-
-model Event {
-  id          Int      @id @default(autoincrement())
-  title       String
+model Badge {
+  id          String      @id @default(cuid())
+  name        String      @unique
   description String
-  startTime   DateTime
-  endTime     DateTime
-
-  classId Int?
-  class   Class? @relation(fields: [classId], references: [id])
+  iconUrl     String      @map("icon_url")
+  userBadges  UserBadge[]
 }
 
-model Announcement {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  date        DateTime
+model UserBadge {
+  userId    String
+  badgeId   String
+  earnedAt  DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+  badge     Badge     @relation(fields: [badgeId], references: [id])
 
-  classId Int?
-  class   Class? @relation(fields: [classId], references: [id])
+  @@id([userId, badgeId])
 }
 
-enum UserSex {
-  MALE
-  FEMALE
+model Leaderboard {
+  userId         String    @id
+  rank           Int
+  xp             Int
+  problemsSolved Int       @map("problems_solved")
+  user           User      @relation(fields: [userId], references: [id])
 }
 
-enum Day {
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
+model Track {
+  id             String         @id @default(cuid())
+  title          String
+  description    String
+  trackProblems  TrackProblem[]
+}
+
+model TrackProblem {
+  trackId    String
+  problemId  String
+  track      Track    @relation(fields: [trackId], references: [id])
+  problem    Problem  @relation(fields: [problemId], references: [id])
+
+  @@id([trackId, problemId])
 }

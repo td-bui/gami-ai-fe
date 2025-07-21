@@ -1,28 +1,23 @@
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+const fakeAnnouncements = [
+  {
+    title: "Welcome Back!",
+    description: "We hope you had a great break. Let's start the new term strong!",
+    date: new Date(),
+  },
+  {
+    title: "Math Exam Next Week",
+    description: "Prepare for the upcoming math exam. Check the schedule for details.",
+    date: new Date(Date.now() - 86400000),
+  },
+  {
+    title: "Science Project Submission",
+    description: "Don't forget to submit your science project by Friday.",
+    date: new Date(Date.now() - 2 * 86400000),
+  },
+];
 
-const Announcements = async () => {
-  const { userId, sessionClaims } = auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-
-  const roleConditions = {
-    teacher: { lessons: { some: { teacherId: userId! } } },
-    student: { students: { some: { id: userId! } } },
-    parent: { students: { some: { parentId: userId! } } },
-  };
-
-  const data = await prisma.announcement.findMany({
-    take: 3,
-    orderBy: { date: "desc" },
-    where: {
-      ...(role !== "admin" && {
-        OR: [
-          { classId: null },
-          { class: roleConditions[role as keyof typeof roleConditions] || {} },
-        ],
-      }),
-    },
-  });
+const Announcements = () => {
+  const data = fakeAnnouncements;
 
   return (
     <div className="bg-white p-4 rounded-md">

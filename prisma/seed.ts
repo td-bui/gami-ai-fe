@@ -1,202 +1,160 @@
-import { Day, PrismaClient, UserSex } from "@prisma/client";
+import { PrismaClient, Prisma } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function main() {
-  // ADMIN
-  await prisma.admin.create({
-    data: {
-      id: "admin1",
-      username: "admin1",
-    },
-  });
-  await prisma.admin.create({
-    data: {
-      id: "admin2",
-      username: "admin2",
-    },
-  });
 
-  // GRADE
-  for (let i = 1; i <= 6; i++) {
-    await prisma.grade.create({
-      data: {
-        level: i,
-      },
-    });
-  }
-
-  // CLASS
-  for (let i = 1; i <= 6; i++) {
-    await prisma.class.create({
-      data: {
-        name: `${i}A`, 
-        gradeId: i, 
-        capacity: Math.floor(Math.random() * (20 - 15 + 1)) + 15,
-      },
-    });
-  }
-
-  // SUBJECT
-  const subjectData = [
-    { name: "Mathematics" },
-    { name: "Science" },
-    { name: "English" },
-    { name: "History" },
-    { name: "Geography" },
-    { name: "Physics" },
-    { name: "Chemistry" },
-    { name: "Biology" },
-    { name: "Computer Science" },
-    { name: "Art" },
-  ];
-
-  for (const subject of subjectData) {
-    await prisma.subject.create({ data: subject });
-  }
-
-  // TEACHER
-  for (let i = 1; i <= 15; i++) {
-    await prisma.teacher.create({
-      data: {
-        id: `teacher${i}`, // Unique ID for the teacher
-        username: `teacher${i}`,
-        name: `TName${i}`,
-        surname: `TSurname${i}`,
-        email: `teacher${i}@example.com`,
-        phone: `123-456-789${i}`,
-        address: `Address${i}`,
-        bloodType: "A+",
-        sex: i % 2 === 0 ? UserSex.MALE : UserSex.FEMALE,
-        subjects: { connect: [{ id: (i % 10) + 1 }] }, 
-        classes: { connect: [{ id: (i % 6) + 1 }] }, 
-        birthday: new Date(new Date().setFullYear(new Date().getFullYear() - 30)),
-      },
-    });
-  }
-
-  // LESSON
-  for (let i = 1; i <= 30; i++) {
-    await prisma.lesson.create({
-      data: {
-        name: `Lesson${i}`, 
-        day: Day[
-          Object.keys(Day)[
-            Math.floor(Math.random() * Object.keys(Day).length)
-          ] as keyof typeof Day
-        ], 
-        startTime: new Date(new Date().setHours(new Date().getHours() + 1)), 
-        endTime: new Date(new Date().setHours(new Date().getHours() + 3)), 
-        subjectId: (i % 10) + 1, 
-        classId: (i % 6) + 1, 
-        teacherId: `teacher${(i % 15) + 1}`, 
-      },
-    });
-  }
-
-  // PARENT
-  for (let i = 1; i <= 25; i++) {
-    await prisma.parent.create({
-      data: {
-        id: `parentId${i}`,
-        username: `parentId${i}`,
-        name: `PName ${i}`,
-        surname: `PSurname ${i}`,
-        email: `parent${i}@example.com`,
-        phone: `123-456-789${i}`,
-        address: `Address${i}`,
-      },
-    });
-  }
-
-  // STUDENT
-  for (let i = 1; i <= 50; i++) {
-    await prisma.student.create({
-      data: {
-        id: `student${i}`, 
-        username: `student${i}`, 
-        name: `SName${i}`,
-        surname: `SSurname ${i}`,
-        email: `student${i}@example.com`,
-        phone: `987-654-321${i}`,
-        address: `Address${i}`,
-        bloodType: "O-",
-        sex: i % 2 === 0 ? UserSex.MALE : UserSex.FEMALE,
-        parentId: `parentId${Math.ceil(i / 2) % 25 || 25}`, 
-        gradeId: (i % 6) + 1, 
-        classId: (i % 6) + 1, 
-        birthday: new Date(new Date().setFullYear(new Date().getFullYear() - 10)),
-      },
-    });
-  }
-
-  // EXAM
+  // Users
+  const users = [];
   for (let i = 1; i <= 10; i++) {
-    await prisma.exam.create({
+    const user = await prisma.user.create({
       data: {
-        title: `Exam ${i}`, 
-        startTime: new Date(new Date().setHours(new Date().getHours() + 1)), 
-        endTime: new Date(new Date().setHours(new Date().getHours() + 2)), 
-        lessonId: (i % 30) + 1, 
+        username: `user${i}`,
+        email: `user${i}@example.com`,
+        password: `hashed_password${i}`, // In production, use proper password hashing
+        role: i === 1 ? "admin" : "user",
+        xp: Math.floor(Math.random() * 1000),
+        level: Math.floor(Math.random() * 10) + 1,
+      },
+    });
+    users.push(user);
+  }
+
+  // Problems
+  const difficulties = ["Easy", "Medium", "Hard"];
+  const problems = [];
+  for (let i = 1; i <= 20; i++) {
+    const problem = await prisma.problem.create({
+      data: {
+        title: `Problem ${i}`,
+        description: `Description for problem ${i}`,
+        difficulty: difficulties[Math.floor(Math.random() * 3)],
+        tags: ["arrays", "strings", "algorithms"],
+        constraints: "1 <= n <= 10^5",
+        examples: "Input: [1,2,3]\nOutput: [3,2,1]",
+        starterCode: "function solution(input) {\n  // Your code here\n}",
+        solutionCode: "function solution(input) {\n  return input.reverse();\n}",
+        createdById: users[0].id, // First user creates all problems
+      },
+    });
+    problems.push(problem);
+  }
+
+  // Test Cases
+  for (const problem of problems) {
+    for (let i = 1; i <= 3; i++) {
+      await prisma.testCase.create({
+        data: {
+          problemId: problem.id,
+          input: `[${i},${i+1},${i+2}]`,
+          expectedOutput: `[${i+2},${i+1},${i}]`,
+          isPublic: i === 1, // First test case is public
+        },
+      });
+    }
+  }
+
+  // Submissions
+  for (const user of users) {
+    for (let i = 1; i <= 3; i++) {
+      await prisma.submission.create({
+        data: {
+          userId: user.id,
+          problemId: problems[i-1].id,
+          code: "function solution(input) { return input.reverse(); }",
+          language: "javascript",
+          status: "ACCEPTED",
+          runtime: Math.random() * 100,
+          memory: Math.random() * 50,
+        },
+      });
+    }
+  }
+
+  // Badges
+  const badges = [];
+  const badgeTypes = ["Beginner", "Intermediate", "Expert", "Master", "Legend"];
+  for (const type of badgeTypes) {
+    const badge = await prisma.badge.create({
+      data: {
+        name: type,
+        description: `${type} level achievement`,
+        iconUrl: `/badges/${type.toLowerCase()}.png`,
+      },
+    });
+    badges.push(badge);
+  }
+
+  // User Badges
+  for (const user of users) {
+    await prisma.userBadge.create({
+      data: {
+        userId: user.id,
+        badgeId: badges[0].id, // Everyone gets beginner badge
       },
     });
   }
 
-  // ASSIGNMENT
-  for (let i = 1; i <= 10; i++) {
-    await prisma.assignment.create({
+  // Tracks
+  const tracks = [];
+  const trackTypes = ["Algorithms", "Data Structures", "Dynamic Programming"];
+  for (const type of trackTypes) {
+    const track = await prisma.track.create({
       data: {
-        title: `Assignment ${i}`, 
-        startDate: new Date(new Date().setHours(new Date().getHours() + 1)), 
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)), 
-        lessonId: (i % 30) + 1, 
+        title: type,
+        description: `Master ${type} concepts`,
+      },
+    });
+    tracks.push(track);
+  }
+
+  // Track Problems
+  for (const track of tracks) {
+    for (let i = 0; i < 5; i++) {
+      await prisma.trackProblem.create({
+        data: {
+          trackId: track.id,
+          problemId: problems[i].id,
+        },
+      });
+    }
+  }
+
+  // Leaderboard
+  for (const user of users) {
+    await prisma.leaderboard.create({
+      data: {
+        userId: user.id,
+        rank: Math.floor(Math.random() * users.length) + 1,
+        xp: user.xp,
+        problemsSolved: Math.floor(Math.random() * problems.length),
       },
     });
   }
 
-  // RESULT
-  for (let i = 1; i <= 10; i++) {
-    await prisma.result.create({
-      data: {
-        score: 90, 
-        studentId: `student${i}`, 
-        ...(i <= 5 ? { examId: i } : { assignmentId: i - 5 }), 
-      },
-    });
+  // User Progress
+  for (const user of users) {
+    for (const problem of problems.slice(0, 5)) {
+      await prisma.userProgress.create({
+        data: {
+          userId: user.id,
+          problemId: problem.id,
+          solved: Math.random() > 0.5,
+          attempts: Math.floor(Math.random() * 5) + 1,
+          firstSolved: new Date(),
+        },
+      });
+    }
   }
 
-  // ATTENDANCE
-  for (let i = 1; i <= 10; i++) {
-    await prisma.attendance.create({
+  // AI Assistance
+  for (const user of users) {
+    await prisma.aiAssistance.create({
       data: {
-        date: new Date(), 
-        present: true, 
-        studentId: `student${i}`, 
-        lessonId: (i % 30) + 1, 
-      },
-    });
-  }
-
-  // EVENT
-  for (let i = 1; i <= 5; i++) {
-    await prisma.event.create({
-      data: {
-        title: `Event ${i}`, 
-        description: `Description for Event ${i}`, 
-        startTime: new Date(new Date().setHours(new Date().getHours() + 1)), 
-        endTime: new Date(new Date().setHours(new Date().getHours() + 2)), 
-        classId: (i % 5) + 1, 
-      },
-    });
-  }
-
-  // ANNOUNCEMENT
-  for (let i = 1; i <= 5; i++) {
-    await prisma.announcement.create({
-      data: {
-        title: `Announcement ${i}`, 
-        description: `Description for Announcement ${i}`, 
-        date: new Date(), 
-        classId: (i % 5) + 1, 
+        userId: user.id,
+        problemId: problems[0].id,
+        suggestionType: "HINT",
+        aiResponse: "Try using a stack for this problem",
       },
     });
   }
@@ -205,11 +163,10 @@ async function main() {
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

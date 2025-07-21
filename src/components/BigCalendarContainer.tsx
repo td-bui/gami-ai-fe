@@ -1,29 +1,38 @@
-import prisma from "@/lib/prisma";
 import BigCalendar from "./BigCalender";
 import { adjustScheduleToCurrentWeek } from "@/lib/utils";
 
-const BigCalendarContainer = async ({
+type Event = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+};
+
+const fakeLessons: Event[] = [
+  {
+    id: "lesson_1",
+    title: "Math",
+    start: new Date(),
+    end: new Date(new Date().getTime() + 60 * 60 * 1000),
+  },
+  {
+    id: "lesson_2",
+    title: "Science",
+    start: new Date(),
+    end: new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
+  },
+];
+
+const BigCalendarContainer = ({
+  // You can keep these props for future use
   type,
   id,
 }: {
   type: "teacherId" | "classId";
   id: string | number;
 }) => {
-  const dataRes = await prisma.lesson.findMany({
-    where: {
-      ...(type === "teacherId"
-        ? { teacherId: id as string }
-        : { classId: id as number }),
-    },
-  });
-
-  const data = dataRes.map((lesson) => ({
-    title: lesson.name,
-    start: lesson.startTime,
-    end: lesson.endTime,
-  }));
-
-  const schedule = adjustScheduleToCurrentWeek(data);
+  // Use fakeLessons instead of fetching from Prisma
+  const schedule = adjustScheduleToCurrentWeek(fakeLessons);
 
   return (
     <div className="">

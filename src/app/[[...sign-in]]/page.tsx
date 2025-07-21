@@ -1,68 +1,102 @@
 "use client";
 
-import * as Clerk from "@clerk/elements/common";
-import * as SignIn from "@clerk/elements/sign-in";
-import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useState } from "react";
+import Spinner from "@/components/Spinner";
 
 const LoginPage = () => {
-  const { isLoaded, isSignedIn, user } = useUser();
-
   const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const role = user?.publicMetadata.role;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    if (role) {
-      router.push(`/${role}`);
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const res = await fetch(`${apiBaseUrl}/api/auth/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.message || "Sign in failed");
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      // Store token and username in localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("username", username); // <-- store username
+      localStorage.setItem("userId", data.userId); // Store userId if needed
+      localStorage.setItem("level", data.level);
+      router.push("/lesson");
+    } catch (err) {
+      setError("Network error");
+      setLoading(false);
     }
-  }, [user, router]);
+  };
 
   return (
     <div className="h-screen flex items-center justify-center bg-lamaSkyLight">
-      <SignIn.Root>
-        <SignIn.Step
-          name="start"
-          className="bg-white p-12 rounded-md shadow-2xl flex flex-col gap-2"
-        >
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <Image src="/logo.png" alt="" width={24} height={24} />
-            SchooLama
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white px-8 py-20 rounded-lg shadow-2xl flex flex-col gap-4 min-w-[400px] max-w-full"
+      >
+        <div className="flex flex-col items-center mb-4">
+          <h1 className="text-2xl font-bold flex flex-col items-center gap-2">
+            <Image src="/logo.png" alt="" width={52} height={52} />
+            <span>CodeXP</span>
           </h1>
-          <h2 className="text-gray-400">Sign in to your account</h2>
-          <Clerk.GlobalError className="text-sm text-red-400" />
-          <Clerk.Field name="identifier" className="flex flex-col gap-2">
-            <Clerk.Label className="text-xs text-gray-500">
-              Username
-            </Clerk.Label>
-            <Clerk.Input
-              type="text"
-              required
-              className="p-2 rounded-md ring-1 ring-gray-300"
-            />
-            <Clerk.FieldError className="text-xs text-red-400" />
-          </Clerk.Field>
-          <Clerk.Field name="password" className="flex flex-col gap-2">
-            <Clerk.Label className="text-xs text-gray-500">
-              Password
-            </Clerk.Label>
-            <Clerk.Input
-              type="password"
-              required
-              className="p-2 rounded-md ring-1 ring-gray-300"
-            />
-            <Clerk.FieldError className="text-xs text-red-400" />
-          </Clerk.Field>
-          <SignIn.Action
-            submit
-            className="bg-blue-500 text-white my-1 rounded-md text-sm p-[10px]"
-          >
-            Sign In
-          </SignIn.Action>
-        </SignIn.Step>
-      </SignIn.Root>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-gray-500">Username</label>
+          <input
+            type="text"
+            required
+            className="p-2 rounded-md ring-1 ring-gray-300 w-80 text-base"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs text-gray-500">Password</label>
+          <input
+            type="password"
+            required
+            className="p-2 rounded-md ring-1 ring-gray-300 w-80 text-base"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+        </div>
+
+        {error && <div className="text-sm text-red-400">{error}</div>}
+        {loading && <Spinner />}
+        
+        <button
+          type="submit"
+          className="bg-blue-500 text-white font-bold my-3 rounded-md w-80 text-sm p-[10px]"
+          disabled={loading}
+        >
+          {loading ? "Signing In..." : "Sign In"}
+        </button>
+
+        <div className="text-xs text-gray-500 mb-2 text-center mt-1">
+          Don't have an account?{" "}
+          <a href="/signup" className="text-blue-500 hover:underline font-semibold">
+            Sign Up
+          </a>
+        </div>
+      </form>
     </div>
   );
 };
