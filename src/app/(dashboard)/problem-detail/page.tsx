@@ -628,10 +628,10 @@ export default function ProblemDetailPage() {
         >
           <CodeEditorPanel
             code={selectedSubmission ? selectedSubmission.code : code}
-            onCodeChange={setCode}
+            onCodeChange={value => setCode(value ?? "")}
             onRun={handleRun}
             onSubmit={handleSubmit}
-            readOnly={!!selectedSubmission}
+            // readOnly={!!selectedSubmission}
             submissionDetail={selectedSubmission}
             maximized={maximized === "editor"}
             onMaximize={() => handleMaximize("editor")}

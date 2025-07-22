@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import oneDark from 'react-syntax-highlighter/dist/cjs/styles/prism/one-dark';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import type { CSSProperties } from "react";
 
 type Message = { from: "user" | "ai"; text: string };
 type SuggestionLink = { type: string; id: number; title?: string } | null;
@@ -163,17 +164,16 @@ export default function AIAssistantMessages({
                             pre({ children, ...props }) {
                               return <pre {...props}>{children}</pre>;
                             },
-                            code({ node, inline, className, children, ...props }) {
+                            code({ node, className, children, ...props }) {
                               const isCodeBlock = className && className.startsWith("language-");
                               if (isCodeBlock) {
                                 const match = /language-(\w+)/.exec(className || "");
                                 return (
                                   <SyntaxHighlighter
-                                    style={oneDark}
+                                    style={oneDark as any}
                                     language={match ? match[1] : undefined}
                                     PreTag="div"
                                     wrapLongLines={true}
-                                    {...props}
                                   >
                                     {String(children).replace(/\n$/, "")}
                                   </SyntaxHighlighter>
@@ -213,7 +213,7 @@ export default function AIAssistantMessages({
                           {
                             (() => {
                               let text = msg.text
-                                .replace(/(\n__SESSION_ID__.*$)/s, "")
+                                .replace(/(\n__SESSION_ID__.*$)/, "")
                                 .replace(/(^|\n)\* (?!\*)(.*)/g, '$1- $2')
                                 .replace(/^(__RUN_CODE__)+/, "")      // Remove one or more __RUN_CODE__ at the start
                                 .replace(/^(__RUN_CODE_DONE__)+/, "");

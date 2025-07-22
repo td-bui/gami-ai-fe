@@ -1,6 +1,5 @@
 import Image from "next/image";
 import EventCalendar from "./EventCalendar";
-import EventList from "./EventList";
 
 const EventCalendarContainer = async ({
   searchParams,
@@ -16,7 +15,7 @@ const EventCalendarContainer = async ({
         <Image src="/moreDark.png" alt="" width={20} height={20} />
       </div>
       <div className="flex flex-col gap-4">
-        <EventList dateParam={date} />
+        {/* <EventList dateParam={date} /> */}
       </div>
     </div>
   );

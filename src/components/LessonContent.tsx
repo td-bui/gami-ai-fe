@@ -49,8 +49,9 @@ const LessonContent = React.memo(function LessonContent({
     lesson.examples?.forEach((ex: any) => {
       const el = document.getElementById(`example-block-${ex.codeId}`);
       if (el) {
-        import("react-dom").then((ReactDOM) => {
-          ReactDOM.render(<ExampleBlock ex={ex} />, el);
+        import("react-dom/client").then(({ createRoot }) => {
+          const root = createRoot(el);
+          root.render(<ExampleBlock ex={ex} />);
         });
       }
     });
@@ -219,9 +220,3 @@ const LessonContent = React.memo(function LessonContent({
 });
 
 export default LessonContent;
-
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(<App />);
-}

@@ -176,7 +176,7 @@ const CodeEditorPanel = ({
                     pre({ children, ...props }) {
                       return <pre {...props}>{children}</pre>;
                     },
-                    code({ node, inline, className, children, ...props }) {
+                    code({ node, className, children, ...props }) {
                       const isCodeBlock = className && className.startsWith("language-");
                       if (isCodeBlock) {
                         const match = /language-(\w+)/.exec(className || "");
@@ -186,7 +186,6 @@ const CodeEditorPanel = ({
                             language={match ? match[1] : undefined}
                             PreTag="div"
                             wrapLongLines={true}
-                            {...props}
                           >
                             {String(children).replace(/\n$/, "")}
                           </SyntaxHighlighter>
@@ -226,7 +225,7 @@ const CodeEditorPanel = ({
                   {
                     (() => {
                       let text = submissionDetail.feedback
-                        .replace(/(\n__SESSION_ID__.*$)/s, "")
+                        .replace(/(\n__SESSION_ID__.*$)/, "")
                         .replace(/(^|\n)\* (?!\*)(.*)/g, '$1- $2')
                         .replace(/^(__RUN_CODE__)+/, "")
                         .replace(/^(__RUN_CODE_DONE__)+/, "");

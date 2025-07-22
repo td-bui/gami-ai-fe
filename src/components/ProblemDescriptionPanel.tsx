@@ -15,12 +15,19 @@ interface ProblemType {
   tags?: string[];
   numberOfAccepted?: number;
   numberOfAttempts?: number;
+  isHtml?: boolean; // <-- Add this line
 }
 
 interface SubmissionType {
+  id: number; // <-- Add this line (or string, if your IDs are strings)
   code: string;
   result: string;
   time: string;
+  status?: string;
+  submittedAt?: string;
+  language?: string;
+  runtime?: number;
+  memory?: number;
 }
 
 interface SubmissionResultType {
@@ -261,17 +268,17 @@ const ProblemDescriptionPanel = ({
                         pre({ children, ...props }) {
                           return <pre {...props}>{children}</pre>;
                         },
-                        code({ node, inline, className, children, ...props }) {
+                        code({ node, className, children, ...props }) {
                           const isCodeBlock = className && className.startsWith("language-");
                           if (isCodeBlock) {
                             const match = /language-(\w+)/.exec(className || "");
                             return (
                               <SyntaxHighlighter
-                                style={oneDark}
+                                style={oneDark as any}
                                 language={match ? match[1] : undefined}
                                 PreTag="div"
                                 wrapLongLines={true}
-                                {...props}
+          
                               >
                                 {String(children).replace(/\n$/, "")}
                               </SyntaxHighlighter>
@@ -311,7 +318,7 @@ const ProblemDescriptionPanel = ({
                       {
                         (() => {
                           let text = submissionResult.submission.feedback
-                            .replace(/(\n__SESSION_ID__.*$)/s, "")
+                            .replace(/(\n__SESSION_ID__.*$)/, "")
                             .replace(/(^|\n)\* (?!\*)(.*)/g, '$1- $2')
                             .replace(/^(__RUN_CODE__)+/, "")
                             .replace(/^(__RUN_CODE_DONE__)+/, "");
@@ -375,7 +382,7 @@ const ProblemDescriptionPanel = ({
                     h2: ({node, ...props}) => <h2 className="text-xl font-bold text-indigo-700 mt-6 mb-3" {...props} />,
                     h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-indigo-600 mt-5 mb-2" {...props} />,
                     h4: ({node, ...props}) => <h4 className="text-base font-semibold text-indigo-500 mt-4 mb-2" {...props} />,
-                    code({ node, inline, className, children, ...props }) {
+                    code({ node, className, children, ...props }) {
                       const isCodeBlock = className && className.startsWith("language-");
                       if (isCodeBlock) {
                         const match = /language-(\w+)/.exec(className || "");
@@ -392,7 +399,6 @@ const ProblemDescriptionPanel = ({
                               fontSize: 14,
                               margin: "12px 0"
                             }}
-                            {...props}
                           >
                             {String(children).replace(/\n$/, "")}
                           </SyntaxHighlighter>

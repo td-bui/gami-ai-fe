@@ -11,8 +11,8 @@ type Message = { from: "user" | "ai"; text: string };
 type Props = {
   expanded: boolean;
   chatPanelWidth: number;
-  lessonId: number | null;
-  lesson: any;
+  lessonId?: number | null;
+  lesson?: any;
   onExpand: () => void;
   onClose: () => void;
   messages: Message[];

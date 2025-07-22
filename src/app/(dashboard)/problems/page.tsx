@@ -252,7 +252,7 @@ export default function ProblemsPage() {
                   </div>
                 </div>
               </div>
-              <ProblemsTable problems={problems} topics={topics} />
+              <ProblemsTable problems={problems} />
               <div ref={listEndRef}></div>
               {problemsLoading && (
                 <div className="text-center text-gray-400 py-4">Loading problems...</div>
