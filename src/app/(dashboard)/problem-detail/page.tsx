@@ -235,6 +235,7 @@ export default function ProblemDetailPage() {
     const start = startTime;
 
     try {
+      const userId = localStorage.getItem("userId"); // Get userId from localStorage
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const submitRes = await authFetch(
         `${apiBaseUrl}/api/problems/${problem.id}/submit`,
@@ -242,7 +243,8 @@ export default function ProblemDetailPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userCode: code
+            userCode: code,
+            userId: userId ? parseInt(userId, 10) : null, // Add userId to payload
           }),
         }
       );
