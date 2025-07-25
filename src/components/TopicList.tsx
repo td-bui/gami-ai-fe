@@ -3,17 +3,14 @@ import React from "react";
 interface Topic {
   id: string;
   name: string;
-}
-interface Problem {
-  topicName: string;
-  // Add other fields as needed
+  numberOfProblems: number;
+  code: string; // Add the code field
 }
 
 interface TopicListProps {
   topics: Topic[];
   expanded: boolean;
   onExpand: () => void;
-  problems: Problem[];
   selectedTopic: string | null;
   onTopicClick: (topicCode: string) => void;
 }
@@ -22,7 +19,6 @@ export default function TopicList({
   topics,
   expanded,
   onExpand,
-  problems,
   selectedTopic,
   onTopicClick,
 }: TopicListProps) {
@@ -55,17 +51,19 @@ export default function TopicList({
       </div>
       <ul className="flex flex-wrap gap-2 mb-2">
         {visibleTopics.map((topic) => {
-          const problemCount = problems.filter((p) => p.topicName === topic.name).length;
-          const isSelected = selectedTopic === topic.id;
+          const problemCount = topic.numberOfProblems;
+          // Compare selectedTopic with topic.code for selection state
+          const isSelected = selectedTopic === topic.code;
           return (
             <li
               key={topic.id}
-              className={`flex items-center justify-between min-w-[110px] px-4 py-2 rounded-full border transition ${
+              className={`flex items-center justify-between min-w-[110px] px-4 py-2 rounded-full border transition cursor-pointer ${
                 isSelected
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100"
               }`}
-              onClick={() => onTopicClick(topic.id)}
+              // Pass topic.code to the click handler
+              onClick={() => onTopicClick(topic.code)}
             >
               <span>{topic.name}</span>
               <span className="ml-2 bg-white text-gray-600 rounded-full px-2 py-0.5 text-xs font-semibold border border-gray-300">

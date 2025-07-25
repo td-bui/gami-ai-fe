@@ -3,8 +3,10 @@ import { useEffect, useState, useRef } from "react";
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
+  const router = useRouter();
   const [username, setUsername] = useState<string>("");
   const [showDropdown, setShowDropdown] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -98,8 +100,7 @@ const Navbar = () => {
                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                 onClick={() => {
                   setShowDropdown(false);
-                  // Navigate to user profile page if you have one
-                  window.location.href = "/profile";
+                  router.push("/dashboard");
                 }}
               >
                 User profile

@@ -1,6 +1,28 @@
 import { authFetch } from "@/utils/authFetch";
 import { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight, FaCheckCircle, FaTimesCircle, FaRedo } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+
+// Helper function to parse the question
+const parseQuestion = (question: string) => {
+  // Add the 's' flag to the end of the regex to match newlines
+  const codeRegex = /<pre><code class='language-python'>(.*?)<\/code><\/pre>/s;
+  const match = question.match(codeRegex);
+
+  if (!match) {
+    return { textBefore: question, code: null, textAfter: null };
+  }
+
+  const code = match[1];
+  const parts = question.split(match[0]);
+  return {
+    textBefore: parts[0],
+    code: code,
+    textAfter: parts[1] || null,
+  };
+};
 
 const QuizSection = ({
   quizzes,
@@ -13,7 +35,8 @@ const QuizSection = ({
   const [selected, setSelected] = useState<string | null>(null);
   const [answers, setAnswers] = useState<(string | null)[]>(Array(quizzes.length).fill(null));
   const [checking, setChecking] = useState(false);
-  const [checkResult, setCheckResult] = useState<{ allCorrect: boolean; wrongQuizIds: number[]; isCompleted: boolean } | null>(null);
+  // Update state type to include xpGained
+  const [checkResult, setCheckResult] = useState<{ allCorrect: boolean; wrongQuizIds: number[]; isCompleted: boolean; xpGained: number } | null>(null);
 
   useEffect(() => {
     setQuizIndex(0);
@@ -65,8 +88,13 @@ const QuizSection = ({
       );
       const data = await res.json();
       setCheckResult(data);
+      // Show toast if XP was gained
+      if (data.xpGained && data.xpGained > 0) {
+        toast.success(`You gained ${data.xpGained} XP! ✨`);
+      }
     } catch (err) {
-      setCheckResult({ allCorrect: false, wrongQuizIds: [], isCompleted: false });
+      setCheckResult({ allCorrect: false, wrongQuizIds: [], isCompleted: false, xpGained: 0 });
+      toast.error("Failed to check answers. Please try again.");
     }
     setChecking(false);
   };
@@ -78,21 +106,33 @@ const QuizSection = ({
     setCheckResult(null);
   };
 
+  const { textBefore, code, textAfter } = parseQuestion(quiz.question);
+
   return (
     <section className="bg-yellow-50 border-2 border-yellow-400 rounded-lg shadow p-6 mb-8">
       <h3 className="text-xl font-bold mb-4 text-yellow-700 flex items-center gap-2">
         <span role="img" aria-label="Quiz">📝</span> Quiz
       </h3>
       <div className="mb-6">
-        <div className="mb-2 font-semibold text-gray-800 flex items-center gap-2">
-          {quiz.question}
-          {checkResult && (
-            checkResult.wrongQuizIds.includes(quiz.id) ? (
-              <FaTimesCircle className="text-red-500" title="Wrong" />
-            ) : (
-              <FaCheckCircle className="text-green-500" title="Correct" />
-            )
+        <div className="mb-2 font-semibold text-gray-800">
+          <div className="flex items-center gap-2">
+            <span>{textBefore}</span>
+            {checkResult && (
+              checkResult.wrongQuizIds.includes(quiz.id) ? (
+                <FaTimesCircle className="text-red-500" title="Wrong" />
+              ) : (
+                <FaCheckCircle className="text-green-500" title="Correct" />
+              )
+            )}
+          </div>
+          {code && (
+            <div className="my-4">
+              <SyntaxHighlighter language="python" style={oneLight} customStyle={{ borderRadius: '0.5rem', fontSize: '0.875rem' }}>
+                {code.trim()}
+              </SyntaxHighlighter>
+            </div>
           )}
+          {textAfter && <span>{textAfter}</span>}
         </div>
         <ul className="mb-2">
           {quiz.options.map((opt: string, idx: number) => {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { prism } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -17,11 +16,6 @@ const ExampleBlock = ({
   };
 }) => {
   const [showDesc, setShowDesc] = useState(false);
-  const router = useRouter();
-
-  const handleTryIt = () => {
-    router.push(`/playground?exampleId=${encodeURIComponent(ex.id)}`);
-  };
 
   return (
     <div className="example-block mb-4 border rounded bg-gray-50 p-4">
@@ -36,12 +30,14 @@ const ExampleBlock = ({
             <FiInfo size={20} />
           </button>
         </div>
-        <button
+        <a
+          href={`/playground?exampleId=${encodeURIComponent(ex.id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold transition"
-          onClick={handleTryIt}
         >
           Try it yourself
-        </button>
+        </a>
       </div>
       {showDesc && (
         <div className="text-gray-600 mt-2 transition-all duration-200">

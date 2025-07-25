@@ -11,6 +11,7 @@ import { authFetch } from "@/utils/authFetch";
 import ProblemDescriptionPanel from "@/components/ProblemDescriptionPanel";
 import CodeEditorPanel from "@/components/CodeEditorPanel";
 import BottomPanel from "@/components/BottomPanel";
+import toast from "react-hot-toast"; // Import toast
 
 // Define a type for the problem data
 interface ProblemType {
@@ -282,6 +283,12 @@ export default function ProblemDetailPage() {
 
       if (!resultData) throw new Error("Timed out waiting for submission result");
       setSubmissionResult(resultData);
+
+      // Show toast if XP was gained
+      if (resultData.xpGained && resultData.xpGained > 0) {
+        toast.success(`You gained ${resultData.xpGained} XP! ✨`);
+      }
+
       setShowAcceptedTab(true);
       setActiveTab("accepted");
       fetchSubmissions(); // refresh list after submit

@@ -144,7 +144,7 @@ export default function ProblemsPage() {
         const availableProblems = problems.length > 0 ? problems : [];
         const random = availableProblems[Math.floor(Math.random() * availableProblems.length)];
         if (random) {
-            window.location.href = `/problems/${random.id}`;
+            window.location.href = `/problem-detail?problemId=${random.id}`;
         }
     };
 
@@ -165,7 +165,6 @@ export default function ProblemsPage() {
                 topics={topics}
                 expanded={expanded}
                 onExpand={() => setExpanded((prev) => !prev)}
-                problems={problems}
                 selectedTopic={selectedTopic}
                 onTopicClick={(topicCode: string) => {
                   setSelectedTopic(prev =>
