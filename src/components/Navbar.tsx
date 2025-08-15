@@ -59,7 +59,7 @@ const Navbar = () => {
         className="flex items-center gap-2 h-8"
       >
         <Image src="/logo.png" alt="logo" width={32} height={32} />
-        <span className="hidden lg:block font-bold">CodeXP</span>
+        <span className="hidden lg:block font-bold">CodePlay AI</span>
       </Link>
       {/* NAVIGATION OPTIONS */}
       <div className="flex items-center gap-6 h-8">

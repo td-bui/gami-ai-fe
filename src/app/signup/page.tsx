@@ -100,7 +100,7 @@ export default function SignupPage() {
             height={48}
             className="mb-2"
           />
-          <span className="text-2xl font-bold">CodeXP</span>
+          <span className="text-2xl font-bold">CodePlay AI</span>
         </div>
         <div className="mb-4">
           <label className="block mb-1 font-medium" htmlFor="username">

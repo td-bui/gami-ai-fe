@@ -14,11 +14,11 @@ Gami AI is an interactive, AI-powered learning platform for coding and problem s
 
 Here are some sample images of the application in action:
 
-![Gami AI Screenshot 1](public/sample_images/CodeXP-mh%20(3).png)
-![Gami AI Screenshot 5](public/sample_images/CodeXP-mh%20(8).png)
-![Gami AI Screenshot 3](public/sample_images/CodeXP-mh%20(6).png)
-![Gami AI Screenshot 4](public/sample_images/CodeXP-mh%20(7).png)
-![Gami AI Screenshot 6](public/sample_images/CodeXP-mh%20(9).png)
+![Gami AI Screenshot 1](public/sample_images/CodePlay AI-mh%20(3).png)
+![Gami AI Screenshot 5](public/sample_images/CodePlay AI-mh%20(8).png)
+![Gami AI Screenshot 3](public/sample_images/CodePlay AI-mh%20(6).png)
+![Gami AI Screenshot 4](public/sample_images/CodePlay AI-mh%20(7).png)
+![Gami AI Screenshot 6](public/sample_images/CodePlay AI-mh%20(9).png)
 
 ## Getting Started
 

@@ -55,7 +55,7 @@ const LoginPage = () => {
         <div className="flex flex-col items-center mb-4">
           <h1 className="text-2xl font-bold flex flex-col items-center gap-2">
             <Image src="/logo.png" alt="" width={52} height={52} />
-            <span>CodeXP</span>
+            <span>CodePlay AI</span>
           </h1>
         </div>
         <div className="flex flex-col gap-1">
